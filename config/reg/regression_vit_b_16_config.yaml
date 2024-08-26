@@ -1,0 +1,43 @@
+accelerator: auto
+arch: vit_b_16
+batch_size: 512
+change_labels: false
+data_dir: /home/soroush1/projects/def-kohitij/soroush1/pretrain-imagenet/data/lamem/lamem_images/lamem
+devices: auto
+experiment: one
+fast_dev_run: false
+image_size: 224
+limit_train_batches: 20
+limit_val_batches: 10
+log_dir: experiments
+log_every_n_steps: 1
+lr: 0.003
+lr_gamma: 0.1
+max_epochs: 300
+momentum: 0.9
+nesterov: true
+norm_mean:
+- 0.485
+- 0.456
+- 0.406
+norm_std:
+- 0.229
+- 0.224
+- 0.225
+num_classes: 1000
+num_nodes: 1
+num_workers: 4
+optimizer: adam
+pin_memories:
+- false
+- false
+- false
+pretrained: false
+scheduler: cosine
+step_size: 30
+strategy: auto
+sync_batchnorm: true
+task_type: regression
+temp_extract: true
+use_blurpool: false
+weight_decay: 0.3
