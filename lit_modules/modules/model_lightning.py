@@ -189,6 +189,29 @@ class ModelLightning(L.LightningModule):
         return loss, acc
 
     def regression_loss(self, outputs, targets):
+        # Validate input shapes
+        if outputs.shape != targets.shape:
+            # Check if reshaping is possible
+            if outputs.numel() != targets.numel():
+                raise ValueError(
+                    f"Cannot reshape tensors: outputs has {outputs.numel()} elements, "
+                    f"targets has {targets.numel()} elements."
+                )
+
+            # Try to reshape outputs to match targets
+            if outputs.dim() > targets.dim():
+                outputs = outputs.squeeze()
+            # If that doesn't work, try to reshape targets to match outputs
+            elif targets.dim() < outputs.dim():
+                targets = targets.unsqueeze(-1)
+
+            # Final check
+            if outputs.shape != targets.shape:
+                raise ValueError(
+                    f"Shapes still don't match after attempted reshape: "
+                    f"outputs shape {outputs.shape}, targets shape {targets.shape}"
+                )
+
         loss = self.regression_criterion(outputs, targets)
         mse = self.mse(outputs, targets)
         return loss, mse

@@ -2,6 +2,7 @@ import os
 from typing import Optional, Dict
 from argparse import Namespace
 import pytorch_lightning as pl
+import torchvision
 from lightning.pytorch.utilities.combined_loader import CombinedLoader
 
 
@@ -13,6 +14,8 @@ class CombinedDataModule(pl.LightningDataModule):
         self.mode = (
             self.hparams.mode
         )  # 'max_size_cycle' or other modes supported by CombinedLoader
+
+        self.task_type = "combined"
 
     def prepare_data(self):
         for dataset in self.datasets.values():
@@ -63,3 +66,40 @@ class CombinedDataModule(pl.LightningDataModule):
                 ),
             }
         return info
+
+    def log_samples_to_tensorboard(self, logger):
+        if self.task_type == "classification" or self.task_type == "combined":
+            # Get a batch of data
+            batch = next(iter(self.train_dataloader()))
+            images, labels = batch
+            if self.task_type == "combined":
+                images, labels = images["classification"], labels["classification"]
+
+            # Create a grid of images
+            grid = torchvision.utils.make_grid(images)
+            logger.experiment.add_image("sample_images", grid, 0)
+
+            # Log labels
+            if self.task_type == "classification":
+                class_names = [f"Class_{i}" for i in range(self.num_classes)]
+                # label_names = [class_names[label] for label in labels]
+                logger.experiment.add_text("sample_labels", ", ".join(class_names), 0)
+            elif self.task_type == "combined":
+                logger.experiment.add_text(
+                    "sample_classification_labels", str(labels.tolist()), 0
+                )
+
+        if self.task_type == "regression" or self.task_type == "combined":
+            batch = next(iter(self.train_dataloader()))
+            images, labels = batch
+            if self.task_type == "combined":
+                images, labels = images["regression"], labels["regression"]
+
+            # Create a grid of images
+            grid = torchvision.utils.make_grid(images)
+            logger.experiment.add_image("sample_regression_images", grid, 0)
+
+            # Log labels
+            logger.experiment.add_text(
+                "sample_regression_labels", str(labels.tolist()), 0
+            )

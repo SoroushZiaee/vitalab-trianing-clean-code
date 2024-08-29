@@ -26,6 +26,8 @@ declare -a configs=(
 
 # Get the current config file
 current_config=${configs[$SLURM_ARRAY_TASK_ID]}
+# Calculate a unique port number for each job
+master_port=$((12345 + $SLURM_ARRAY_TASK_ID))
 
 echo "Start Installing and setup env"
 source /home/soroush1/projects/def-kohitij/soroush1/vitalab-trianing-clean-code/bash/prepare_env/setup_env_node.sh
@@ -44,6 +46,6 @@ pip freeze
 
 echo "Running regression job for config: $current_config"
 
-torchrun --nproc_per_node=2 --node_rank=0 --master_addr="localhost" --master_port=1234 \
+torchrun --nproc_per_node=2 --node_rank=0 --master_addr="localhost" --master_port=$master_port \
     /home/soroush1/projects/def-kohitij/soroush1/vitalab-trianing-clean-code/scripts/trainings/regression.py \
-    --config /home/soroush1/projects/def-kohitij/soroush1/vitalab-trianing-clean-code/config/reg/${current_config}
+    --config /home/soroush1/projects/def-kohitij/soroush1/vitalab-trianing-clean-code/config/reg_v2/${current_config}

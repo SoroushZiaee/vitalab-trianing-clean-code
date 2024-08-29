@@ -14,6 +14,8 @@ parent_dir = os.path.dirname(parent_dir)
 sys.path.append(parent_dir)
 
 import torch
+
+torch.set_float32_matmul_precision("medium")  # or 'medium' for more speed
 import torchvision
 from torch.utils.data import Dataset, DataLoader, random_split
 from torchvision import transforms
@@ -23,7 +25,11 @@ from lightning.pytorch.loggers import TensorBoardLogger
 from lightning.pytorch.utilities import CombinedLoader
 
 from lit_modules.modules import ModelLightning
-from lit_modules.datamodule import ImageNetDataModule, LaMemDataModule
+from lit_modules.datamodule import (
+    ImageNetDataModule,
+    LaMemDataModule,
+    CombinedDataModule,
+)
 
 
 def test_datamodule_batches(datamodule):
@@ -324,8 +330,21 @@ def main(config_path):
     num_workers = config.get("num_workers", 4)
 
     # Define hyperparameters
-    hparams = Namespace(
-        data_dir=config.get("data_dir", "/path/to/imagenet"),
+    imagenet_hparams = Namespace(
+        data_dir="/home/soroush1/projects/def-kohitij/soroush1/idiosyncrasy/imagenet",
+        image_size=image_size,
+        batch_size=batch_size,
+        num_workers=num_workers,
+        temp_extract=config.get("temp_extract", True),
+        pin_memories=config.get("pin_memories", [False, False, False]),
+    )
+
+    # Create the DataModule
+    imagenet_dm = ImageNetDataModule(imagenet_hparams)
+
+    # Define hyperparameters
+    lamem_hparams = Namespace(
+        data_dir="/home/soroush1/projects/def-kohitij/soroush1/pretrain-imagenet/data/lamem/lamem_images/lamem",
         image_size=image_size,
         batch_size=batch_size,
         num_workers=num_workers,
@@ -334,13 +353,22 @@ def main(config_path):
     )
 
     # Create the DataModule
-    datamodule = LaMemDataModule(hparams)
+    lamem_dm = LaMemDataModule(lamem_hparams)
 
     # Prepare data and setup
-    # datamodule.prepare_data()
-    # datamodule.setup()
 
-    test_datamodule_batches(datamodule)
+    # Create a dictionary of datasets
+    datasets = {"regression": lamem_dm, "classification": imagenet_dm}
+
+    # Define hyperparameters for the combined datamodule
+    combined_hparams = Namespace(mode="max_size_cycle")
+
+    # Create the combined datamodule
+    datamodule = CombinedDataModule(combined_hparams, datasets)
+    datamodule.prepare_data()
+    datamodule.setup()
+
+    # test_datamodule_batches(datamodule)
 
     # Create TensorBoard logger
     # Create TensorBoard logger
@@ -348,10 +376,9 @@ def main(config_path):
         config.get("log_dir", "experiments"), name=f"{arch}/{task_type}", log_graph=True
     )
 
-    if task_type in ["regression", "classification", "combined"]:
-        datamodule.log_samples_to_tensorboard(logger)
+    # if task_type in ["regression", "classification", "combined"]:
+    #     datamodule.log_samples_to_tensorboard(logger)
 
-    # Define hyperparameters for the model
     # Define hyperparameters for the model
     model_hparams = {
         "arch": arch,

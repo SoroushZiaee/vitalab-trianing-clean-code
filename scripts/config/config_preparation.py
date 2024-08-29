@@ -17,7 +17,7 @@ def generate_config(model, params):
         "change_labels": False,
         "pin_memories": [False, False, False],
         "pretrained": False,
-        "use_blurpool": False,
+        "use_blurpool": True,
         "lr": params["lr"],
         "weight_decay": params["weight_decay"],
         "momentum": params["momentum"],
@@ -53,7 +53,7 @@ model_groups = {
     "group1": {
         "models": ["alexnet", "resnet18", "resnet50", "resnet101", "vgg16", "vgg19"],
         "params": {
-            "batch_size": 32,
+            "batch_size": 256,
             "epochs": 90,
             "lr": 0.01,
             "momentum": 0.9,
@@ -61,6 +61,7 @@ model_groups = {
             "step_size": 30,
             "lr_gamma": 0.1,
             "scheduler": "step",
+            "optimizer": "adam",
         },
     },
     "group2": {
@@ -74,6 +75,7 @@ model_groups = {
             "step_size": 30,
             "lr_gamma": 0.1,
             "scheduler": "cosine",
+            "optimizer": "adam",
         },
     },
     "group3": {

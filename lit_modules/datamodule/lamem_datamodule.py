@@ -36,6 +36,8 @@ class LaMemDataModule(pl.LightningDataModule):
 
         self.dims = (3, self.image_size, self.image_size)
 
+        self.task_type = "regression"  # regression task
+
     def prepare_data(self):
         # Check if the data is already downloaded
         if not os.path.exists(os.path.join(self.data_dir, "images")):

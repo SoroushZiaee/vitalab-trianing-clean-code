@@ -4,8 +4,8 @@
 #SBATCH --error=jupyter.err
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=10
-#SBATCH --time=10:00:00
-#SBATCH --gres=gpu:a100:2
+#SBATCH --time=24:00:00
+#SBATCH --gres=gpu:a100:1
 #SBATCH --mem=20G
 #SBATCH --mail-type=BEGIN,END,FAIL # Send email on job END and FAIL
 #SBATCH --mail-user=soroush1@yorku.ca
