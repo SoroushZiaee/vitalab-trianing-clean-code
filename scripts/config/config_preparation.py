@@ -4,7 +4,7 @@ from pathlib import Path
 
 def generate_config(model, params):
     base_config = {
-        "task_type": "regression",
+        "task_type": "classification",
         "max_epochs": params["epochs"],
         "arch": model,
         "optimizer": params.get("optimizer", "sgd"),
@@ -17,6 +17,7 @@ def generate_config(model, params):
         "change_labels": False,
         "pin_memories": [False, False, False],
         "pretrained": False,
+        "random_training": True,
         "use_blurpool": True,
         "lr": params["lr"],
         "weight_decay": params["weight_decay"],
@@ -90,6 +91,7 @@ model_groups = {
             "lr_gamma": 0.1,
             "scheduler": "cosine",
             "optimizer": "adam",
+            "image_size": 224,
         },
     },
 }

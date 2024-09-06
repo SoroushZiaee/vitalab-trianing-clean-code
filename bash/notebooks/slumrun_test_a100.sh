@@ -4,7 +4,7 @@
 #SBATCH --error=jupyter.err
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=10
-#SBATCH --time=24:00:00
+#SBATCH --time=12:00:00
 #SBATCH --gres=gpu:a100:1
 #SBATCH --mem=20G
 #SBATCH --mail-type=BEGIN,END,FAIL # Send email on job END and FAIL
@@ -28,5 +28,7 @@ pip install --no-index -r requirements.txt
 echo "Env has been set up"
 
 pip freeze
+
+python /home/soroush1/projects/def-kohitij/soroush1/vitalab-trianing-clean-code/scripts/prepare_server/datamodule_imagenet_preparation.py
 
 /home/soroush1/projects/def-kohitij/soroush1/vitalab-trianing-clean-code/bash/notebooks/lab.sh

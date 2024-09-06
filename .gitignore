@@ -163,5 +163,6 @@ cython_debug/
 
 *.err
 *.out
+*.ckpt
 experiments/
 notebooks/test/lightning_logs/

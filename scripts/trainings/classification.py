@@ -21,6 +21,12 @@ import lightning as L
 from lightning import LightningDataModule
 from lightning.pytorch.loggers import TensorBoardLogger
 from lightning.pytorch.utilities import CombinedLoader
+from lightning.pytorch.callbacks import (
+    ModelCheckpoint,
+    EarlyStopping,
+    LearningRateMonitor,
+    BatchSizeFinder,
+)
 
 from lit_modules.modules import ModelLightning
 from lit_modules.datamodule import ImageNetDataModule
@@ -329,7 +335,8 @@ def main(config_path):
         image_size=image_size,
         batch_size=batch_size,
         num_workers=num_workers,
-        temp_extract=config.get("temp_extract", True),
+        # temp_extract=config.get("temp_extract", True),
+        temp_extract=False,
         pin_memories=config.get("pin_memories", [False, False, False]),
     )
 
@@ -343,10 +350,20 @@ def main(config_path):
     test_datamodule_batches(datamodule)
 
     # Create TensorBoard logger
-    # Create TensorBoard logger
     logger = TensorBoardLogger(
-        config.get("log_dir", "experiments"), name=f"{arch}/{task_type}", log_graph=True
+        config.get("log_dir", "experiments"),
+        name=f"{arch}/{task_type}",
+        log_graph=True if not arch in ["vit_b_16", "vit_b_32"] else False,
     )
+    model_checkpoint = ModelCheckpoint(
+        dirpath=f"checkpoints/{task_type}/{arch}",
+        auto_insert_metric_name=True,
+        save_weights_only=True,
+    )
+    lr_monitor = LearningRateMonitor(logging_interval="step")
+
+    # batchsize finder
+    # batchsize_finder = BatchSizeFinder()
 
     if task_type in ["regression", "classification", "combined"]:
         datamodule.log_samples_to_tensorboard(logger)
@@ -371,6 +388,7 @@ def main(config_path):
         "step_size": config.get("step_size", 30),
         "max_epochs": max_epochs,
         "lr_gamma": config.get("lr_gamma", 0.1),
+        "random_training": config.get("random_training", False),
     }
 
     pprint(model_hparams)
@@ -384,6 +402,11 @@ def main(config_path):
         # limit_train_batches=config.get("limit_train_batches", 20),
         # limit_val_batches=config.get("limit_val_batches", 10),
         logger=logger,
+        callbacks=[
+            model_checkpoint,
+            lr_monitor,
+            # batchsize_finder,
+        ],
         log_every_n_steps=config.get("log_every_n_steps", 1),
         accelerator=config.get("accelerator", "auto"),
         strategy="ddp",

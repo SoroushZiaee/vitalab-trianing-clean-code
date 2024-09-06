@@ -13,15 +13,15 @@
 
 # Array of combined config files
 declare -a configs=(
-    "combine_alexnet_config.yaml"
-    "combine_efficientnet_b0_config.yaml"
-    "combine_resnet18_config.yaml"
-    "combine_resnet50_config.yaml"
-    "combine_resnet101_config.yaml"
-    "combine_vgg16_config.yaml"
-    "combine_vgg19_config.yaml"
-    "combine_vit_b_16_config.yaml"
-    "combine_vit_b_32_config.yaml"
+    "combined_alexnet_config.yaml"
+    "combined_efficientnet_b0_config.yaml"
+    "combined_resnet18_config.yaml"
+    "combined_resnet50_config.yaml"
+    "combined_resnet101_config.yaml"
+    "combined_vgg16_config.yaml"
+    "combined_vgg19_config.yaml"
+    "combined_vit_b_16_config.yaml"
+    "combined_vit_b_32_config.yaml"
 )
 
 # Get the current config file
@@ -45,6 +45,8 @@ echo "Env has been set up"
 pip freeze
 
 echo "Running combined task job for config: $current_config"
+
+python /home/soroush1/projects/def-kohitij/soroush1/vitalab-trianing-clean-code/scripts/prepare_server/datamodule_imagenet_preparation.py
 
 torchrun --nproc_per_node=4 --node_rank=0 --master_addr="localhost" --master_port=$master_port \
     /home/soroush1/projects/def-kohitij/soroush1/vitalab-trianing-clean-code/scripts/trainings/combine.py \

@@ -9,17 +9,22 @@
 #SBATCH --mem=20G
 #SBATCH --mail-type=BEGIN,END,FAIL
 #SBATCH --mail-user=soroush1@yorku.ca
-#SBATCH --array=0-8  # This creates 9 jobs, one for each config file
+#SBATCH --array=0-1  # This creates 9 jobs, one for each config file
 
 # Array of classification config files
+# declare -a configs=(
+#     "classification_alexnet_config.yaml"
+#     "classification_efficientnet_b0_config.yaml"
+#     "classification_resnet18_config.yaml"
+#     "classification_resnet50_config.yaml"
+#     "classification_resnet101_config.yaml"
+#     "classification_vgg16_config.yaml"
+#     "classification_vgg19_config.yaml"
+#     "classification_vit_b_16_config.yaml"
+#     "classification_vit_b_32_config.yaml"
+# )
+
 declare -a configs=(
-    "classification_alexnet_config.yaml"
-    "classification_efficientnet_b0_config.yaml"
-    "classification_resnet18_config.yaml"
-    "classification_resnet50_config.yaml"
-    "classification_resnet101_config.yaml"
-    "classification_vgg16_config.yaml"
-    "classification_vgg19_config.yaml"
     "classification_vit_b_16_config.yaml"
     "classification_vit_b_32_config.yaml"
 )
@@ -48,6 +53,8 @@ pip freeze
 echo "Running classification job for config: $current_config"
 echo "Using master_port: $master_port"
 
+python /home/soroush1/projects/def-kohitij/soroush1/vitalab-trianing-clean-code/scripts/prepare_server/datamodule_imagenet_preparation.py
+
 torchrun --nproc_per_node=2 --node_rank=0 --master_addr="localhost" --master_port=$master_port \
     /home/soroush1/projects/def-kohitij/soroush1/vitalab-trianing-clean-code/scripts/trainings/classification.py \
-    --config /home/soroush1/projects/def-kohitij/soroush1/vitalab-trianing-clean-code/config/clf_v2/${current_config}
+    --config /home/soroush1/projects/def-kohitij/soroush1/vitalab-trianing-clean-code/config/clf_rnd/${current_config}

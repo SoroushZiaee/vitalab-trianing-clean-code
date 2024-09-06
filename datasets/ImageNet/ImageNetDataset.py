@@ -48,7 +48,7 @@ class ImageNet(ImageFolder):
             self.temp_dir = tempfile.mkdtemp(dir=os.environ.get("SLURM_TMPDIR", "/tmp"))
             logging.info(f"Using temporary directory for extraction: {self.temp_dir}")
         else:
-            self.temp_dir = None
+            self.temp_dir = os.path.join(os.environ.get("SLURM_TMPDIR", "/tmp"), "data")
 
         logging.info("Parsing archives...")
         self.parse_archives()
@@ -87,13 +87,13 @@ class ImageNet(ImageFolder):
         if self.temp_extract:
             return os.path.join(self.temp_dir, self.split)
         else:
-            return os.path.join(self.root, self.split)
+            return os.path.join(self.temp_dir, self.split)
 
     def extra_repr(self) -> str:
         return f"Split: {self.split}"
 
     def __del__(self):
-        if self.temp_extract and self.temp_dir:
+        if self.temp_extract:
             logging.info(f"Cleaning up temporary directory: {self.temp_dir}")
             shutil.rmtree(self.temp_dir)
 

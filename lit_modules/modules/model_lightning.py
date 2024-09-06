@@ -24,6 +24,7 @@ class ModelLightning(L.LightningModule):
         super().__init__()
         self.save_hyperparameters(hparams)
         self.task_type = self.hparams.task_type
+        self.random_training = self.hparams.random_training  # Added for random training
 
         self.model = self.get_model()
         logger.info(f"Model architecture: {self.hparams.arch}")
@@ -154,6 +155,12 @@ class ModelLightning(L.LightningModule):
 
     def classification_step(self, batch, stage, task_prefix="classification"):
         inputs, targets = batch
+
+        # Added for random training (for testing purposes)
+        if self.random_training:
+            targets = torch.randint(0, self.hparams.num_classes, (targets.size(0),))
+            targets = targets.to(inputs.device)
+
         outputs = self(inputs)
 
         classification_outputs = self.handle_combined_output(outputs, "classification")
